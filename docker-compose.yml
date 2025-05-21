@@ -1,0 +1,43 @@
+services:
+
+  api:
+
+    image: registry.nocturlab.fr/mbleunven/brief21
+
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      HOST: 0.0.0.0
+      PORT: 8075
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.morgan-web.rule=Host(`morgan.nocturlab.fr`)"
+      - "traefik.http.services.morgan-web.loadbalancer.server.port=8075"
+    depends_on:
+      - db
+    networks:
+      - traefik
+      - db
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - db
+
+volumes:
+  postgres-data:
+  
+networks:
+  db:
+  traefik:
+     external: true
+     name: traefik_default
